@@ -2,6 +2,7 @@
 /// This class is used to encapsulate country data in a structured format.
 class CountryEntity {
   final String id;
+  
   /// The common name of the country (e.g., "United States").
   final String commonName;
 
@@ -43,7 +44,6 @@ class CountryEntity {
 
   /// The term used for the country's residents (e.g., "American").
   final String demonym;
-
 
   /// Constructor for creating a new instance of CountryEntity.
   CountryEntity({

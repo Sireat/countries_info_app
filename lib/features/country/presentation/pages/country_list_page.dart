@@ -1,20 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 import '../providers/country_provider.dart';
 import 'country_details_page.dart';
 import 'favorites_page.dart';
 
-class CountryListPage extends StatelessWidget {
+class CountryListPage extends StatefulWidget {
   const CountryListPage({super.key});
+
+  @override
+  _CountryListPageState createState() => _CountryListPageState();
+}
+
+class _CountryListPageState extends State<CountryListPage> {
+  Timer? _timer;
+  bool _isTimeout = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch countries with a timeout mechanism
+    _startFetchWithTimeout();
+  }
+
+  void _startFetchWithTimeout() {
+    final provider = Provider.of<CountryProvider>(context, listen: false);
+    provider.fetchCountries();
+
+    // Start a timer to check if fetching takes too long
+    _timer = Timer(const Duration(seconds: 10), () {
+      if (provider.filteredCountries.isEmpty && !provider.isLoading) {
+        setState(() {
+          _isTimeout = true;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<CountryProvider>(context);
-
-    // Fetch countries if not already loaded
-    if (!provider.isLoading && provider.filteredCountries.isEmpty) {
-      provider.fetchCountries();
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -59,6 +90,7 @@ class CountryListPage extends StatelessWidget {
                     ),
                     onChanged: (query) {
                       provider.filterCountries(query);
+                      _resetTimeout();
                     },
                   ),
                 ),
@@ -75,6 +107,7 @@ class CountryListPage extends StatelessWidget {
                     onChanged: (value) {
                       if (value != null) {
                         provider.filterByRegion(value);
+                        _resetTimeout();
                       }
                     },
                     items: <String>['All', 'Africa', 'Asia', 'Europe', 'Oceania', 'Americas']
@@ -100,58 +133,98 @@ class CountryListPage extends StatelessWidget {
         child: provider.isLoading
             ? const Center(child: CircularProgressIndicator())
             : provider.errorMessage.isNotEmpty
-                ? Center(
-                    child: Text(
-                      provider.errorMessage,
-                      style: const TextStyle(color: Colors.red, fontSize: 16),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: provider.filteredCountries.length,
-                    itemBuilder: (context, index) {
-                      final country = provider.filteredCountries[index];
-                      return Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        margin: const EdgeInsets.symmetric(vertical: 6.0),
-                        child: ListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: Image.network(
-                              country.flag,
-                              width: 60,
-                              height: 40,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.error, color: Colors.redAccent),
+                ? _buildErrorDisplay(provider.errorMessage)
+                : _isTimeout || provider.filteredCountries.isEmpty
+                    ? _buildErrorDisplay('No countries found.')
+                    : ListView.builder(
+                        itemCount: provider.filteredCountries.length,
+                        itemBuilder: (context, index) {
+                          final country = provider.filteredCountries[index];
+                          return Card(
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          ),
-                          title: Text(
-                            country.commonName,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          subtitle: Text(
-                            country.region,
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
-                          trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CountryDetailsPage(country: country),
+                            margin: const EdgeInsets.symmetric(vertical: 6.0),
+                            child: ListTile(
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Image.network(
+                                  country.flag,
+                                  width: 60,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(Icons.error, color: Colors.redAccent),
+                                ),
                               ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
+                              title: Text(
+                                country.commonName,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              subtitle: Text(
+                                country.region,
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                              trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => CountryDetailsPage(country: country),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+      ),
+    );
+  }
+
+  // Reset timeout when search or filter is performed
+  void _resetTimeout() {
+    _timer?.cancel();
+    setState(() {
+      _isTimeout = false;
+    });
+    _startFetchWithTimeout();
+  }
+
+  // Error display widget
+  Widget _buildErrorDisplay(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.warning,
+            size: 60,
+            color: Colors.orange.shade700,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            message,
+            style: const TextStyle(
+              color: Colors.grey,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              _resetTimeout();
+              Provider.of<CountryProvider>(context, listen: false).fetchCountries();
+            },
+            child: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }

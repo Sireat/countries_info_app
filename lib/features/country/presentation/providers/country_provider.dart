@@ -31,7 +31,7 @@ class CountryProvider with ChangeNotifier {
       _filteredCountries = _countries; // Initialize with unfiltered list
       _applyFilters(); // Apply any existing filters
     } catch (e) {
-      _errorMessage = 'Failed to load countries: ${e.toString()}';
+      _errorMessage = 'Network error: Failed to load countries.';
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -41,12 +41,22 @@ class CountryProvider with ChangeNotifier {
   void filterCountries(String query) {
     _selectedQuery = query;
     _applyFilters();
+    if (_filteredCountries.isEmpty) {
+      _errorMessage = 'Country not found for "$query".'; // Set error message when no results found
+    } else {
+      _errorMessage = ''; // Clear error message when results are found
+    }
     notifyListeners();
   }
 
   void filterByRegion(String region) {
     _selectedRegion = region;
     _applyFilters();
+    if (_filteredCountries.isEmpty) {
+      _errorMessage = 'No countries found in the "$region" region.'; // Set error message when no results found
+    } else {
+      _errorMessage = '';
+    }
     notifyListeners();
   }
 
