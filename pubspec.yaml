@@ -35,6 +35,10 @@ dependencies:
   sqflite_common_ffi: ^2.3.3
   any: ^0.0.0
   sqlite3_flutter_libs: ^0.5.24
+  dartz: ^0.10.1
+  dio: ^5.7.0
+  json_annotation: ^4.9.0
+  flutter_screenutil: ^5.9.3
 
 dev_dependencies:
   flutter_test:

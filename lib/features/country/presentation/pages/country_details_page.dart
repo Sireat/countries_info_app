@@ -10,17 +10,23 @@ class CountryDetailsPage extends StatefulWidget {
   const CountryDetailsPage({super.key, required this.country});
 
   @override
+  // ignore: library_private_types_in_public_api
   _CountryDetailsPageState createState() => _CountryDetailsPageState();
 }
 
 class _CountryDetailsPageState extends State<CountryDetailsPage> {
-  late Future<bool> _isFavoriteFuture;
+  bool _isFavorite = false;
 
   @override
   void initState() {
     super.initState();
-    _isFavoriteFuture = Provider.of<CountryProvider>(context, listen: false)
-        .isFavorite(widget.country);
+    _loadFavoriteStatus();
+  }
+
+  Future<void> _loadFavoriteStatus() async {
+    final provider = Provider.of<CountryProvider>(context, listen: false);
+    _isFavorite = await provider.isFavorite(widget.country);
+    setState(() {});
   }
 
   @override
@@ -31,55 +37,90 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> {
       appBar: AppBar(
         title: Text(widget.country.commonName),
         actions: [
-          FutureBuilder<bool>(
-            future: _isFavoriteFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Icon(Icons.favorite_border);
-              } else if (snapshot.hasData && snapshot.data!) {
-                return IconButton(
-                  icon: const Icon(Icons.favorite),
-                  onPressed: () {
-                    provider.toggleFavorite(widget.country);
-                    setState(() {
-                      _isFavoriteFuture = provider.isFavorite(widget.country);
-                    });
-                  },
-                );
-              } else {
-                return IconButton(
-                  icon: const Icon(Icons.favorite_border),
-                  onPressed: () {
-                    provider.toggleFavorite(widget.country);
-                    setState(() {
-                      _isFavoriteFuture = provider.isFavorite(widget.country);
-                    });
-                  },
-                );
-              }
+          IconButton(
+            icon: Icon(
+              _isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: _isFavorite ? Colors.red : Colors.grey,
+            ),
+            onPressed: () async {
+              await provider.toggleFavorite(widget.country);
+              _loadFavoriteStatus(); // Refresh the favorite status after toggling
             },
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(widget.country.flag),
+            // Improved Flag Display
+            Center(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.0), // Rounded corners
+                  border: Border.all(
+                    color: Colors.black.withOpacity(0.5), // Border color
+                    width: 2.0, // Border width
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3), // Shadow color
+                      blurRadius: 8.0, // Shadow blur radius
+                      offset: const Offset(0, 4), // Shadow offset
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16.0), // Match container radius
+                  child: Image.network(
+                    widget.country.flag,
+                    width: MediaQuery.of(context).size.width * 0.9, // Responsive width
+                    height: MediaQuery.of(context).size.width * 0.5, // Responsive height
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
-            Text('Official Name: ${widget.country.officialName}', style: const TextStyle(fontSize: 16)),
-            Text('Capital: ${widget.country.capital}', style: const TextStyle(fontSize: 16)),
-            Text('Region: ${widget.country.region}', style: const TextStyle(fontSize: 16)),
-            Text('Languages: ${widget.country.languages.join(', ')}', style: const TextStyle(fontSize: 16)),
-            Text('Area: ${widget.country.area} km²', style: const TextStyle(fontSize: 16)),
-            Text('Population: ${widget.country.population}', style: const TextStyle(fontSize: 16)),
-            Text('Demonym: ${widget.country.demonym}', style: const TextStyle(fontSize: 16)),
-            Text('Car Side: ${widget.country.carSide}', style: const TextStyle(fontSize: 16)),
-            Text('Timezone: ${widget.country.timezone}', style: const TextStyle(fontSize: 16)),
-            Text('Borders: ${widget.country.borders.join(', ')}', style: const TextStyle(fontSize: 16)),
+
+            // Section Title
+            Text(
+              'Country Information',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+
+            // Information Cards
+            Card(
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
+              elevation: 4.0, // Higher elevation for better depth
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0), // Rounded corners
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildInfoRow('Official Name:', widget.country.officialName),
+                    _buildInfoRow('Capital:', widget.country.capital),
+                    _buildInfoRow('Region:', widget.country.region),
+                    _buildInfoRow('Languages:', widget.country.languages.join(', ')),
+                    _buildInfoRow('Area:', '${widget.country.area} km²'),
+                    _buildInfoRow('Population:', widget.country.population.toString()),
+                    _buildInfoRow('Demonym:', widget.country.demonym),
+                    _buildInfoRow('Car Side:', widget.country.carSide),
+                    _buildInfoRow('Timezone:', widget.country.timezone),
+                    _buildInfoRow('Borders:', widget.country.borders.join(', ')),
+                    _buildInfoRow('Currency:', widget.country.currency),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
-            const Text('Maps: ', style: TextStyle(fontSize: 16)),
+
+            // Maps Link
             GestureDetector(
               onTap: () => _launchURL(widget.country.mapsUrl),
               child: const Text(
@@ -93,8 +134,32 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> {
     );
   }
 
+  Widget _buildInfoRow(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(value),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _launchURL(String url) async {
+    // ignore: deprecated_member_use
     if (await canLaunch(url)) {
+      // ignore: deprecated_member_use
       await launch(url);
     } else {
       throw 'Could not launch $url';

@@ -13,10 +13,12 @@ void main() {
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi; // Set the database factory to FFI
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
