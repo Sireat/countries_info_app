@@ -1,11 +1,19 @@
+import 'package:countries_info_app/app.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart'; 
-import 'app.dart'; 
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqflite_ffi;
 
 void main() {
-  // Initialize the FFI and set the database factory to favorite
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi; // Set the database factory to FFI
-
-  runApp(const MyApp());
+  if (!kIsWeb) {
+    if (defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      // Mobile platform initialization
+    } else {
+      // Desktop platform initialization
+      sqflite_ffi.sqfliteFfiInit();
+      databaseFactory = sqflite_ffi.databaseFactoryFfi;
+    }
+  }
+  runApp( const MyApp());
 }

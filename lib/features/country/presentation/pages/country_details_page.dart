@@ -186,16 +186,20 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> with SingleTick
     );
   }
 
-  /// Launches the provided URL in a web browser.
-  Future<void> _launchURL(String url) async {
-    // ignore: deprecated_member_use
-    if (await canLaunch(url)) {
-      // ignore: deprecated_member_use
-      await launch(url);
-    } else {
-      throw 'Could not launch $url'; // Error message if URL cannot be launched
-    }
+ Future<void> _launchURL(String url) async {
+  
+  final Uri uri = Uri.parse(url);
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri);
+  } else {
+    // ignore: use_build_context_synchronously
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Could not launch $url')),
+    );
+    throw 'Could not launch $url';
   }
+}
+
 
   /// Displays a surprise overlay when the favorite status is toggled.
   void _showSurpriseOverlay(BuildContext context) {
