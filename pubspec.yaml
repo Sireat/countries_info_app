@@ -27,9 +27,10 @@ dependencies:
   provider: ^6.0.5
   http: ^1.2.2
   cached_network_image: ^3.2.3
-  sqflite: ^2.2.7
+  sqflite: ^2.3.3+1
   path_provider: ^2.0.14
   url_launcher: ^6.3.0
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:

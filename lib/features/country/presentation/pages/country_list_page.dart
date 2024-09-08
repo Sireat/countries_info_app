@@ -19,16 +19,38 @@ class CountryListPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Countries'),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(56.0),
+          preferredSize: const Size.fromHeight(100.0),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: TextField(
-              decoration: const InputDecoration(
-                hintText: 'Search...',
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.search),
-              ),
-              onChanged: provider.filterCountries,
+            child: Column(
+              children: [
+                TextField(
+                  decoration: const InputDecoration(
+                    hintText: 'Search...',
+                    border: OutlineInputBorder(),
+                    suffixIcon: Icon(Icons.search),
+                  ),
+                  onChanged: (query) {
+                    provider.filterCountries(query);
+                  },
+                ),
+                const SizedBox(height: 10),
+                DropdownButton<String>(
+                  value: provider.selectedRegion,
+                  onChanged: (value) {
+                    if (value != null) {
+                      provider.filterByRegion(value);
+                    }
+                  },
+                  items: <String>['All', 'Africa', 'Asia', 'Europe', 'Oceania', 'Americas']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
           ),
         ),

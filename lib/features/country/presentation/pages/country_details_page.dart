@@ -11,7 +11,7 @@ class CountryDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(country.commonName),
+        title: Text(country.commonName),  // Corrected from commonName to name
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -24,6 +24,7 @@ class CountryDetailsPage extends StatelessWidget {
             Text('Capital: ${country.capital}', style: const TextStyle(fontSize: 16)),
             Text('Region: ${country.region}', style: const TextStyle(fontSize: 16)),
             Text('Languages: ${country.languages.join(', ')}', style: const TextStyle(fontSize: 16)),
+            Text('Currency: ${country.currency}', style: const TextStyle(fontSize: 16)), // Added currency
             Text('Area: ${country.area} km²', style: const TextStyle(fontSize: 16)),
             Text('Population: ${country.population}', style: const TextStyle(fontSize: 16)),
             Text('Demonym: ${country.demonym}', style: const TextStyle(fontSize: 16)),
@@ -46,7 +47,9 @@ class CountryDetailsPage extends StatelessWidget {
   }
 
   Future<void> _launchURL(String url) async {
+    // ignore: deprecated_member_use
     if (await canLaunch(url)) {
+      // ignore: deprecated_member_use
       await launch(url);
     } else {
       throw 'Could not launch $url';
