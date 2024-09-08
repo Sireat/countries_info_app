@@ -14,13 +14,27 @@ class CountryDetailsPage extends StatefulWidget {
   _CountryDetailsPageState createState() => _CountryDetailsPageState();
 }
 
-class _CountryDetailsPageState extends State<CountryDetailsPage> {
+class _CountryDetailsPageState extends State<CountryDetailsPage> with SingleTickerProviderStateMixin {
   bool _isFavorite = false;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
     _loadFavoriteStatus();
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _animation = Tween<double>(begin: 1.0, end: 1.5).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   Future<void> _loadFavoriteStatus() async {
@@ -37,14 +51,26 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> {
       appBar: AppBar(
         title: Text(widget.country.commonName),
         actions: [
-          IconButton(
-            icon: Icon(
-              _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: _isFavorite ? Colors.red : Colors.grey,
-            ),
-            onPressed: () async {
-              await provider.toggleFavorite(widget.country);
-              _loadFavoriteStatus(); // Refresh the favorite status after toggling
+          AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              return IconButton(
+                icon: Icon(
+                  _isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: _isFavorite ? Colors.red : Colors.grey,
+                  size: 28.0 * _animation.value,
+                ),
+                onPressed: () async {
+                  if (_isFavorite) {
+                    _animationController.reverse();
+                  } else {
+                    _animationController.forward();
+                    _showSurpriseOverlay(context);
+                  }
+                  await provider.toggleFavorite(widget.country);
+                  _loadFavoriteStatus(); // Refresh the favorite status after toggling
+                },
+              );
             },
           ),
         ],
@@ -164,5 +190,62 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> {
     } else {
       throw 'Could not launch $url';
     }
+  }
+
+  void _showSurpriseOverlay(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Stack(
+            children: [
+              Center(
+                child: ScaleTransition(
+                  scale: _animation,
+                  child: Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(16.0),
+                    child: const Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow,
+                          size: 100.0,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Congratulation!',
+                          style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'You have a new favorite!',
+                          style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 }
