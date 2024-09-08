@@ -93,4 +93,9 @@ The project follows the Clean Architecture principles:
 
 ## Sample Screenshoot
 
-   ![Alt text](path/to/image)
+   ![Alt text](screenshoot/logo.jpg)
+   ![Alt text](screenshoot/home.jpg)
+   ![Alt text](screenshoot/homefilter.jpg)
+   ![Alt text](screenshoot/detail.jpg)
+   ![Alt text](screenshoot/newfavorite.jpg)
+   ![Alt text](screenshoot/favorite.jpg)
