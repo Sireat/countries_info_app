@@ -9,6 +9,8 @@ class CountryListPage extends StatefulWidget {
   const CountryListPage({super.key});
 
   @override
+  // State management for CountryListPage
+  // ignore: library_private_types_in_public_api
   _CountryListPageState createState() => _CountryListPageState();
 }
 
@@ -19,7 +21,7 @@ class _CountryListPageState extends State<CountryListPage> {
   @override
   void initState() {
     super.initState();
-    // Fetch countries with a timeout mechanism
+    // Start fetching countries with a timeout mechanism
     _startFetchWithTimeout();
   }
 
@@ -89,6 +91,7 @@ class _CountryListPageState extends State<CountryListPage> {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12.0),
                     ),
                     onChanged: (query) {
+                      // Filter countries based on search query
                       provider.filterCountries(query);
                       _resetTimeout();
                     },
@@ -106,6 +109,7 @@ class _CountryListPageState extends State<CountryListPage> {
                     value: provider.selectedRegion,
                     onChanged: (value) {
                       if (value != null) {
+                        // Filter countries based on selected region
                         provider.filterByRegion(value);
                         _resetTimeout();
                       }
@@ -186,7 +190,7 @@ class _CountryListPageState extends State<CountryListPage> {
     );
   }
 
-  // Reset timeout when search or filter is performed
+  // Reset the timeout when search or filter is performed
   void _resetTimeout() {
     _timer?.cancel();
     setState(() {
@@ -195,7 +199,7 @@ class _CountryListPageState extends State<CountryListPage> {
     _startFetchWithTimeout();
   }
 
-  // Error display widget
+  // Display error messages with retry button
   Widget _buildErrorDisplay(String message) {
     return Center(
       child: Column(

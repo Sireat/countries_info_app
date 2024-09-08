@@ -4,8 +4,9 @@ import '../../domain/entities/country_entity.dart';
 import '../providers/country_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// Page displaying detailed information about a country, including its favorite status.
 class CountryDetailsPage extends StatefulWidget {
-  final CountryEntity country;
+  final CountryEntity country; // Country entity containing details to display
 
   const CountryDetailsPage({super.key, required this.country});
 
@@ -15,15 +16,16 @@ class CountryDetailsPage extends StatefulWidget {
 }
 
 class _CountryDetailsPageState extends State<CountryDetailsPage> with SingleTickerProviderStateMixin {
-  bool _isFavorite = false;
-  late AnimationController _animationController;
-  late Animation<double> _animation;
+  bool _isFavorite = false; // Indicates if the country is marked as a favorite
+  late AnimationController _animationController; // Controller for animation
+  late Animation<double> _animation; // Animation for the favorite icon
 
   @override
   void initState() {
     super.initState();
-    _loadFavoriteStatus();
+    _loadFavoriteStatus(); // Load initial favorite status
 
+    // Initialize animation controller and animation
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -37,10 +39,11 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> with SingleTick
     );
   }
 
+  /// Load and set the favorite status of the country.
   Future<void> _loadFavoriteStatus() async {
     final provider = Provider.of<CountryProvider>(context, listen: false);
     _isFavorite = await provider.isFavorite(widget.country);
-    setState(() {});
+    setState(() {}); // Refresh the state to reflect favorite status
   }
 
   @override
@@ -49,7 +52,7 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> with SingleTick
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.country.commonName),
+        title: Text(widget.country.commonName), // Display country name in app bar
         actions: [
           AnimatedBuilder(
             animation: _animation,
@@ -58,17 +61,17 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> with SingleTick
                 icon: Icon(
                   _isFavorite ? Icons.favorite : Icons.favorite_border,
                   color: _isFavorite ? Colors.red : Colors.grey,
-                  size: 28.0 * _animation.value,
+                  size: 28.0 * _animation.value, // Animated size for favorite icon
                 ),
                 onPressed: () async {
                   if (_isFavorite) {
-                    _animationController.reverse();
+                    _animationController.reverse(); // Reverse animation if already favorite
                   } else {
-                    _animationController.forward();
-                    _showSurpriseOverlay(context);
+                    _animationController.forward(); // Forward animation if not favorite
+                    _showSurpriseOverlay(context); // Show surprise overlay
                   }
-                  await provider.toggleFavorite(widget.country);
-                  _loadFavoriteStatus(); // Refresh the favorite status after toggling
+                  await provider.toggleFavorite(widget.country); // Toggle favorite status
+                  _loadFavoriteStatus(); // Refresh favorite status
                 },
               );
             },
@@ -80,7 +83,7 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> with SingleTick
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Improved Flag Display
+            // Display country flag with styling
             Center(
               child: Container(
                 decoration: BoxDecoration(
@@ -110,17 +113,17 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> with SingleTick
             ),
             const SizedBox(height: 16),
 
-            // Section Title
+            // Section title for country information
             Text(
               'Country Information',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
 
-            // Information Cards
+            // Display country information in cards
             Card(
               margin: const EdgeInsets.symmetric(vertical: 8.0),
-              elevation: 4.0, // Higher elevation for better depth
+              elevation: 4.0, // Elevation for depth effect
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0), // Rounded corners
               ),
@@ -146,7 +149,7 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> with SingleTick
             ),
             const SizedBox(height: 16),
 
-            // Maps Link
+            // Link to Google Maps
             GestureDetector(
               onTap: () => _launchURL(widget.country.mapsUrl),
               child: const Text(
@@ -160,6 +163,7 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> with SingleTick
     );
   }
 
+  /// Builds a row displaying a title and value for country information.
   Widget _buildInfoRow(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -182,16 +186,18 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> with SingleTick
     );
   }
 
+  /// Launches the provided URL in a web browser.
   Future<void> _launchURL(String url) async {
     // ignore: deprecated_member_use
     if (await canLaunch(url)) {
       // ignore: deprecated_member_use
       await launch(url);
     } else {
-      throw 'Could not launch $url';
+      throw 'Could not launch $url'; // Error message if URL cannot be launched
     }
   }
 
+  /// Displays a surprise overlay when the favorite status is toggled.
   void _showSurpriseOverlay(BuildContext context) {
     showDialog(
       context: context,
@@ -245,7 +251,7 @@ class _CountryDetailsPageState extends State<CountryDetailsPage> with SingleTick
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _animationController.dispose(); // Dispose animation controller to free resources
     super.dispose();
   }
 }

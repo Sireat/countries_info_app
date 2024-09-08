@@ -8,44 +8,52 @@ class FavoritesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Obtain the CountryProvider from the context
     final provider = Provider.of<CountryProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Favorites'),
-        centerTitle: true,
+        centerTitle: true, // Center the title in the AppBar
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: FutureBuilder<List<String>>(
-          future: provider.getFavorites(), // Fetch favorites from the database
+          future: provider.getFavorites(), // Fetch the list of favorite countries from the provider
           builder: (context, snapshot) {
+            // Display a loading spinner while the data is being fetched
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
+            } 
+            // Display an error message if there was an error fetching the data
+            else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            } 
+            // Display a message if there are no favorites
+            else if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const Center(child: Text('No favorites yet.', style: TextStyle(fontSize: 18)));
-            } else {
+            } 
+            // Display the list of favorite countries
+            else {
               final favoriteNames = snapshot.data!;
 
-              // Fetch all countries to ensure filteredCountries has the full list
+              // Fetch the full list of countries to filter by favorites
               final allCountries = provider.filteredCountries;
 
-              // Filter the countries to only include favorites
+              // Filter the list to include only those countries that are favorites
               final favoriteCountries = allCountries
                   .where((country) => favoriteNames.contains(country.commonName))
                   .toList();
 
               return ListView.builder(
-                itemCount: favoriteCountries.length,
+                itemCount: favoriteCountries.length, // Number of favorite countries
                 itemBuilder: (context, index) {
                   final country = favoriteCountries[index];
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 8.0),
                     elevation: 4.0, // Elevation for shadow effect
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(12.0), // Rounded corners for the card
                     ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16.0),
@@ -53,20 +61,21 @@ class FavoritesPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8.0),
                         child: Image.network(
                           country.flag,
-                          width: 80, // Increased image width
-                          height: 60, // Adjusted image height
-                          fit: BoxFit.cover,
+                          width: 80, // Width of the country flag image
+                          height: 60, // Height of the country flag image
+                          fit: BoxFit.cover, // Ensure the image covers the allocated space
                         ),
                       ),
                       title: Text(
                         country.commonName,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontWeight: FontWeight.bold), // Bold text for the country name
                       ),
                       subtitle: Text(
                         country.region,
-                        style: const TextStyle(color: Colors.grey),
+                        style: const TextStyle(color: Colors.grey), // Grey text for the region
                       ),
                       onTap: () {
+                        // Navigate to the details page for the selected country
                         Navigator.push(
                           context,
                           MaterialPageRoute(
