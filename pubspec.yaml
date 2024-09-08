@@ -31,6 +31,10 @@ dependencies:
   path_provider: ^2.0.14
   url_launcher: ^6.3.0
   path: ^1.9.0
+  equatable: ^2.0.5
+  sqflite_common_ffi: ^2.3.3
+  any: ^0.0.0
+  sqlite3_flutter_libs: ^0.5.24
 
 dev_dependencies:
   flutter_test:

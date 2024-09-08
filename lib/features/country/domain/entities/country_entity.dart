@@ -1,6 +1,7 @@
 /// Represents a country entity with various attributes.
 /// This class is used to encapsulate country data in a structured format.
 class CountryEntity {
+  final String id;
   /// The common name of the country (e.g., "United States").
   final String commonName;
 
@@ -46,6 +47,7 @@ class CountryEntity {
 
   /// Constructor for creating a new instance of CountryEntity.
   CountryEntity({
+    required this.id,
     required this.commonName,
     required this.officialName,
     required this.flag,

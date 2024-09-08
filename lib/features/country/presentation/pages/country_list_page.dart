@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../providers/country_provider.dart';
 import 'country_details_page.dart';
+import 'favorites_page.dart';
 
 class CountryListPage extends StatelessWidget {
   const CountryListPage({super.key});
@@ -18,6 +18,19 @@ class CountryListPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Countries'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.favorite),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const FavoritesPage(),
+                ),
+              );
+            },
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(100.0),
           child: Padding(

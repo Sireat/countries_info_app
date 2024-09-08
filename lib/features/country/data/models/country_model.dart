@@ -18,7 +18,7 @@ class CountryModel extends CountryEntity {
     required super.timezone, 
     required super.area, 
     required super.population, 
-    required super.demonym,
+    required super.demonym, required super.id,
     
   });
 
@@ -67,7 +67,7 @@ class CountryModel extends CountryEntity {
       timezone: timezone,
       area: area,
       population: population,
-      demonym: demonym,
+      demonym: demonym, id: '',
     );
   }
 }
