@@ -4,44 +4,36 @@ import '../../domain/repositories/country_repository.dart';
 
 class CountryProvider with ChangeNotifier {
   final CountryRepository repository;
-  List<CountryEntity> countries = [];
-  List<CountryEntity> filteredCountries = [];
-  CountryEntity? selectedCountry;
-  bool isLoading = false;
-  String errorMessage = '';
+  List<CountryEntity> _countries = [];
+  List<CountryEntity> _filteredCountries = [];
+  bool _isLoading = false;
+  String _errorMessage = '';
 
   CountryProvider(this.repository);
 
-  Future<void> fetchAllCountries() async {
-    isLoading = true;
+  List<CountryEntity> get filteredCountries => _filteredCountries;
+  bool get isLoading => _isLoading;
+  String get errorMessage => _errorMessage;
+
+  Future<void> fetchCountries() async {
+    _isLoading = true;
     notifyListeners();
     try {
-      countries = await repository.getAllCountries();
-      filteredCountries = countries;
+      _countries = await repository.getAllCountries();
+      _filteredCountries = _countries;
     } catch (e) {
-      errorMessage = e.toString();
+      _errorMessage = 'Failed to load countries';
     } finally {
-      isLoading = false;
+      _isLoading = false;
       notifyListeners();
     }
   }
 
   void filterCountries(String query) {
-    filteredCountries = countries.where((country) =>
-        country.name.toLowerCase().contains(query.toLowerCase())).toList();
+    _filteredCountries = _countries
+        .where((country) =>
+            country.commonName.toLowerCase().contains(query.toLowerCase()))
+        .toList();
     notifyListeners();
-  }
-
-  Future<void> searchCountry(String name) async {
-    isLoading = true;
-    notifyListeners();
-    try {
-      selectedCountry = await repository.getCountryByName(name);
-    } catch (e) {
-      errorMessage = e.toString();
-    } finally {
-      isLoading = false;
-      notifyListeners();
-    }
   }
 }

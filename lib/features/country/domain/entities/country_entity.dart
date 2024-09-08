@@ -1,21 +1,33 @@
 class CountryEntity {
-  final String name;
+  final String commonName;
+  final String officialName;
   final String flag;
-  final String region;
   final String capital;
-  final int population;
-  final String currency;
+  final String region;
   final List<String> languages;
+  final String currency;
   final List<String> borders;
+  final String mapsUrl;
+  final String carSide;
+  final String timezone;
+  final double area;
+  final int population;
+  final String demonym;
 
   CountryEntity({
-    required this.name,
+    required this.commonName,
+    required this.officialName,
     required this.flag,
-    required this.region,
     required this.capital,
-    required this.population,
-    required this.currency,
+    required this.region,
     required this.languages,
+    required this.currency,
     required this.borders,
+    required this.mapsUrl,
+    required this.carSide,
+    required this.timezone,
+    required this.area,
+    required this.population,
+    required this.demonym,
   });
 }

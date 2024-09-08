@@ -1,7 +1,8 @@
-import 'package:countries_info_app/core/error/failure.dart';
+import '../../../../core/error/failure.dart';
 import '../../domain/entities/country_entity.dart';
 import '../../domain/repositories/country_repository.dart';
 import '../datasources/country_remote_datasource.dart';
+
 
 class CountryRepositoryImpl implements CountryRepository {
   final CountryRemoteDataSource remoteDataSource;
@@ -11,18 +12,20 @@ class CountryRepositoryImpl implements CountryRepository {
   @override
   Future<List<CountryEntity>> getAllCountries() async {
     try {
-      return await remoteDataSource.getAllCountries();
-    } on ServerFailure catch (e) {
-      throw ServerFailure(e.message);
+      final countries = await remoteDataSource.getAllCountries();
+      return countries;
+    } catch (e) {
+      throw ServerFailure('Failed to fetch countries: ${e.toString()}');
     }
   }
 
   @override
   Future<CountryEntity> getCountryByName(String name) async {
     try {
-      return await remoteDataSource.getCountryByName(name);
-    } on ServerFailure catch (e) {
-      throw ServerFailure(e.message);
+      final country = await remoteDataSource.getCountryByName(name);
+      return country;
+    } catch (e) {
+      throw ServerFailure('Failed to fetch country by name: ${e.toString()}');
     }
   }
 }
